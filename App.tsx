@@ -186,8 +186,8 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Stats Cards - ปรับเป็นแนวตั้งเรียงต่อกัน */}
+        <div className="flex flex-col gap-6">
           <div className="bg-white p-6 rounded-[2rem] shadow-xl border border-emerald-50 flex items-center gap-4">
             <div className="p-4 bg-emerald-100 rounded-2xl"><ArrowDownCircleIcon className="w-8 h-8 text-emerald-600" /></div>
             <div>
@@ -211,9 +211,10 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Main Content Area - ปรับจาก Grid เป็น Stack แนวตั้ง */}
+        <div className="flex flex-col gap-8">
           {/* Form Section */}
-          <div className="lg:col-span-1 bg-white p-8 rounded-[3rem] shadow-2xl border border-orange-50">
+          <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-orange-50">
             <h2 className="text-2xl font-black mb-6 flex items-center gap-3">
               <PlusIcon className="w-6 h-6 text-orange-600" />
               บันทึกรายการ
@@ -226,7 +227,7 @@ const App: React.FC = () => {
 
               <div className="space-y-3">
                 <p className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">เลือกหมวดหมู่</p>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                   {Object.values(TransactionCategory).map((cat) => {
                     const Config = categoryConfig[cat];
                     const Icon = Config.icon;
@@ -246,65 +247,71 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="ชื่อรายการ / ผู้บริจาค"
-                className="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl px-5 py-4 focus:bg-white focus:border-orange-200 outline-none transition-all font-bold"
-              />
-              <input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="จำนวนเงิน"
-                className="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl px-5 py-4 focus:bg-white focus:border-orange-200 outline-none transition-all font-mono text-xl font-black text-orange-600"
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="ชื่อรายการ / ผู้บริจาค"
+                  className="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl px-5 py-4 focus:bg-white focus:border-orange-200 outline-none transition-all font-bold"
+                />
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="จำนวนเงิน"
+                  className="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl px-5 py-4 focus:bg-white focus:border-orange-200 outline-none transition-all font-mono text-xl font-black text-orange-600"
+                />
+              </div>
               <button type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white font-black py-4 rounded-2xl shadow-lg shadow-orange-100 transition-all active:scale-95">บันทึกข้อมูล</button>
             </form>
           </div>
 
-          {/* Charts Section */}
-          <div className="lg:col-span-2 space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
-               {/* Bar Chart */}
-              <div className="bg-white p-8 rounded-[3rem] shadow-xl border border-slate-50 flex flex-col h-full">
-                <h3 className="font-black text-slate-400 text-xs uppercase tracking-widest mb-6">เปรียบเทียบรับ-จ่าย</h3>
-                <div className="flex-1 min-h-[250px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={barData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12, fontWeight: 700}} dy={10} />
-                      <YAxis axisLine={false} tickLine={false} tick={{fill: '#cbd5e1', fontSize: 10}} />
-                      <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                      <Bar dataKey="value" radius={[10, 10, 0, 0]} barSize={50}>
-                        {barData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
+          {/* Charts Section - ปรับเป็นแนวตั้งเรียงต่อกัน */}
+          <div className="flex flex-col gap-8">
+            {/* Bar Chart */}
+            <div className="bg-white p-8 rounded-[3rem] shadow-xl border border-slate-50 flex flex-col">
+              <h3 className="font-black text-slate-400 text-xs uppercase tracking-widest mb-6">เปรียบเทียบรับ-จ่าย</h3>
+              <div className="min-h-[300px] w-full">
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={barData}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12, fontWeight: 700}} dy={10} />
+                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#cbd5e1', fontSize: 10}} />
+                    <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                    <Bar dataKey="value" radius={[10, 10, 0, 0]} barSize={60}>
+                      {barData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
+            </div>
 
-              {/* Pie Chart */}
-              <div className="bg-white p-8 rounded-[3rem] shadow-xl border border-slate-50 flex flex-col h-full">
-                <h3 className="font-black text-slate-400 text-xs uppercase tracking-widest mb-6">สัดส่วนแยกตามหมวด</h3>
-                <div className="flex-1 min-h-[250px]">
-                  <ResponsiveContainer width="100%" height="100%">
+            {/* Pie Chart */}
+            <div className="bg-white p-8 rounded-[3rem] shadow-xl border border-slate-50 flex flex-col">
+              <h3 className="font-black text-slate-400 text-xs uppercase tracking-widest mb-6">สัดส่วนแยกตามหมวด</h3>
+              <div className="flex flex-col md:flex-row items-center gap-8">
+                <div className="min-h-[250px] w-full md:w-1/2">
+                  <ResponsiveContainer width="100%" height={250}>
                     <PieChart>
-                      <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                      <Pie data={pieData} cx="50%" cy="50%" innerRadius={70} outerRadius={90} paddingAngle={5} dataKey="value">
                         {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
                       </Pie>
                       <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none' }} />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="grid grid-cols-2 gap-2 mt-4">
+                <div className="grid grid-cols-2 gap-4 w-full md:w-1/2">
                   {pieData.map((d, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: d.color }}></div>
-                      <span className="text-[10px] font-bold text-slate-500">{d.name}</span>
+                    <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: d.color }}></div>
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold text-slate-500">{d.name}</span>
+                        <span className="text-sm font-black text-slate-800">{d.value.toLocaleString()} บ.</span>
+                      </div>
                     </div>
                   ))}
+                  {pieData.length === 0 && <p className="col-span-2 text-center text-slate-400 font-bold py-4 italic">ยังไม่มีข้อมูลการใช้จ่าย</p>}
                 </div>
               </div>
             </div>
@@ -318,16 +325,16 @@ const App: React.FC = () => {
               <DocumentTextIcon className="w-7 h-7 text-orange-600" />
               ประวัติรายการ
             </h2>
-            <div className="flex gap-2 bg-slate-100 p-1 rounded-2xl">
+            <div className="flex gap-2 bg-slate-100 p-1 rounded-2xl overflow-x-auto">
               {['all', 'income', 'expense'].map((t) => (
-                <button key={t} onClick={() => setActiveTab(t as any)} className={`px-6 py-2 rounded-xl text-sm font-black transition-all ${activeTab === t ? 'bg-white shadow text-orange-600' : 'text-slate-400'}`}>
+                <button key={t} onClick={() => setActiveTab(t as any)} className={`px-6 py-2 rounded-xl text-sm font-black whitespace-nowrap transition-all ${activeTab === t ? 'bg-white shadow text-orange-600' : 'text-slate-400'}`}>
                   {t === 'all' ? 'ทั้งหมด' : t === 'income' ? 'รายรับ' : 'รายจ่าย'}
                 </button>
               ))}
             </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full text-left min-w-[600px]">
               <thead>
                 <tr className="bg-slate-50/50 text-slate-400 text-[10px] uppercase font-black tracking-widest">
                   <th className="px-10 py-6">วันที่</th>
