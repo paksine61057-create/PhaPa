@@ -10,7 +10,20 @@
     <style>
         body {
             font-family: 'Kanit', sans-serif;
-            background-color: #fcfcfc;
+            background-color: #fff9f2; /* ปรับเป็นสีครีมอุ่นๆ */
+            background-image: url("https://www.transparenttextures.com/patterns/cream-paper.png"); /* เพิ่ม Texture กระดาษ */
+        }
+        /* เพิ่มลวดลายไทยจางๆ เป็น Background Overlay */
+        .thai-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: -1;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCI+CjxwYXRoIGQ9Ik0zMCAwIEw2MCAzMCBMMzAgNjAgTDAgMzAgWiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZDY4OTExIiBzdHJva2Utd2lkdGg9IjEiLz4KPC9zdmc+');
         }
     </style>
 <script type="importmap">
@@ -27,6 +40,7 @@
 </script>
 </head>
 <body>
+    <div class="thai-pattern"></div>
     <div id="root"></div>
 </body>
 </html>
