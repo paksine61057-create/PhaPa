@@ -33,7 +33,8 @@ import {
 } from 'recharts';
 import { getBudgetInsights } from './services/geminiService';
 
-const GOAL_TARGET = 200000;
+// ตั้งเป้าซื้อเครื่องคอมเครื่องละ 20,000 บาท
+const GOAL_TARGET = 200000; 
 const PRICE_PER_PC = 20000;
 
 const categoryConfig = {
@@ -46,7 +47,6 @@ const categoryConfig = {
 const App: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>(() => {
     const saved = localStorage.getItem('phapa_transactions');
-    // เปลี่ยนจาก MOCK_DATA เป็นอาเรย์ว่าง [] เพื่อไม่ให้มีข้อมูลตัวอย่างแสดงผล
     return saved ? JSON.parse(saved) : [];
   });
   const [activeTab, setActiveTab] = useState<'all' | 'income' | 'expense'>('all');
@@ -160,13 +160,13 @@ const App: React.FC = () => {
               <div>
                 <h3 className="text-xl font-black text-slate-800 flex items-center gap-2">
                   <CheckCircleIcon className="w-6 h-6 text-emerald-500" />
-                  เป้าหมาย: จัดหาคอมพิวเตอร์เพื่อการศึกษา
+                  เป้าหมาย: จัดหาคอมพิวเตอร์ (เครื่องละ {PRICE_PER_PC.toLocaleString()} บาท)
                 </h3>
                 <p className="text-slate-500">ยอดเงินคงเหลือปัจจุบันสามารถจัดหาได้ประมาณ <span className="text-orange-600 font-black">{pcCount}</span> เครื่อง</p>
               </div>
               <div className="text-right">
                 <span className="text-3xl font-black text-orange-600">{progressPercent.toFixed(1)}%</span>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">ของเป้าหมาย {GOAL_TARGET.toLocaleString()} บ.</p>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">ของเป้าหมาย {GOAL_TARGET.toLocaleString()} บ. (10 เครื่อง)</p>
               </div>
            </div>
            <div className="w-full bg-slate-100 h-6 rounded-full overflow-hidden shadow-inner">
