@@ -388,50 +388,63 @@ const App: React.FC = () => {
 
         {/* Printable Report (Official Format) */}
         <div id="printable-report" className="bg-white text-black p-10 font-serif leading-relaxed">
-          <div className="report-title">
-            <h1 className="text-2xl font-bold mb-1">รายงานสรุปผลการดำเนินงานงบประมาณงานผ้าป่าเพื่อการศึกษา</h1>
-            <h2 className="text-xl font-bold mb-1">โรงเรียนประจักษ์ศิลปาคม</h2>
-            <p className="text-md">ประจำปีการศึกษา 2569</p>
-            <p className="text-sm mt-4 italic">วันที่พิมพ์เอกสาร: {new Date().toLocaleDateString('th-TH')} เวลา {new Date().toLocaleTimeString('th-TH')}</p>
+          {/* Page 1: Overview Summary */}
+          <div className="report-page">
+            <div className="report-title">
+              <h1 className="text-2xl font-bold mb-1 uppercase">รายงานสรุปผลการดำเนินงานงบประมาณงานผ้าป่าเพื่อการศึกษา</h1>
+              <h2 className="text-xl font-bold mb-1">โรงเรียนประจักษ์ศิลปาคม</h2>
+              <p className="text-md font-bold underline">ประจำปีการศึกษา 2569</p>
+              <p className="text-sm mt-4 italic">วันที่พิมพ์เอกสาร: {new Date().toLocaleDateString('th-TH')} เวลา {new Date().toLocaleTimeString('th-TH')}</p>
+            </div>
+
+            <div className="mb-10">
+              <h3 className="text-lg font-bold mb-6 border-b-2 border-black inline-block uppercase">ส่วนที่ 1: สรุปยอดเงินรวมทั้งหมด</h3>
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border p-4 text-center">หัวข้อรายการสรุป</th>
+                    <th className="border p-4 text-right">จำนวนเงิน (บาท)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="h-12">
+                    <td className="border p-4 font-bold">1. ยอดรายรับสะสมทั้งหมด (Total Income)</td>
+                    <td className="border p-4 text-right font-mono text-xl">{summary.totalIncome.toLocaleString()}</td>
+                  </tr>
+                  <tr className="h-12">
+                    <td className="border p-4 font-bold">2. ยอดรายจ่ายสะสมทั้งหมด (Total Expense)</td>
+                    <td className="border p-4 text-right font-mono text-xl">{summary.totalExpense.toLocaleString()}</td>
+                  </tr>
+                  <tr className="bg-gray-50 h-16">
+                    <td className="border p-4 font-bold text-2xl">ยอดเงินคงเหลือสุทธิ (Net Balance)</td>
+                    <td className="border p-4 text-right font-mono font-bold text-2xl underline decoration-double">
+                      {summary.balance.toLocaleString()}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div className="mt-8 p-6 border-2 border-black rounded-xl bg-gray-50">
+                <p className="text-lg leading-relaxed">
+                  <strong>สรุปผลการวิเคราะห์เป้าหมาย:</strong> จากยอดเงินคงเหลือจำนวน {summary.balance.toLocaleString()} บาท 
+                  ทางคณะกรรมการสามารถจัดหาเครื่องคอมพิวเตอร์เพื่อการศึกษาได้ประมาณ 
+                  <span className="text-xl font-bold underline px-2">{pcCount}</span> เครื่อง 
+                  (ตามราคามาตรฐานครุภัณฑ์เครื่องละ {PRICE_PER_PC.toLocaleString()} บาท)
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div className="mb-8">
-            <h3 className="text-lg font-bold mb-4 underline">ส่วนที่ 1: สรุปยอดเงินรวม</h3>
+          {/* Page 2: Category Summary */}
+          <div className="page-break">
+            <h3 className="text-lg font-bold mb-6 border-b-2 border-black inline-block uppercase mt-10">ส่วนที่ 2: สรุปยอดเงินรายรับ-รายจ่าย แยกตามหมวดหมู่</h3>
             <table className="w-full">
               <thead>
-                <tr className="bg-gray-100">
-                  <th className="border p-2">หัวข้อสรุป</th>
-                  <th className="border p-2 text-right">จำนวนเงิน (บาท)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="border p-2 font-bold">ยอดรายรับสะสมทั้งหมด (Total Income)</td>
-                  <td className="border p-2 text-right font-mono">{summary.totalIncome.toLocaleString()}</td>
-                </tr>
-                <tr>
-                  <td className="border p-2 font-bold">ยอดรายจ่ายสะสมทั้งหมด (Total Expense)</td>
-                  <td className="border p-2 text-right font-mono">{summary.totalExpense.toLocaleString()}</td>
-                </tr>
-                <tr className="bg-gray-50">
-                  <td className="border p-2 font-bold text-lg">ยอดเงินคงเหลือสุทธิ (Net Balance)</td>
-                  <td className="border p-2 text-right font-mono font-bold text-lg underline">{summary.balance.toLocaleString()}</td>
-                </tr>
-              </tbody>
-            </table>
-            <p className="mt-2 text-sm italic">* หมายเหตุ: ยอดคงเหลือสามารถจัดหาคอมพิวเตอร์เพื่อการศึกษาได้ประมาณ {pcCount} เครื่อง (ราคาเครื่องละ {PRICE_PER_PC.toLocaleString()} บาท)</p>
-          </div>
-
-          <div className="mb-8">
-            <h3 className="text-lg font-bold mb-4 underline">ส่วนที่ 2: สรุปยอดเงินรายรับ-รายจ่าย แยกตามหมวดหมู่</h3>
-            <table className="w-full">
-              <thead>
-                <tr className="bg-gray-100">
+                <tr className="bg-gray-100 h-12">
                   <th className="border p-2 text-center">ลำดับ</th>
-                  <th className="border p-2">ชื่อหมวดหมู่</th>
+                  <th className="border p-2">ชื่อหมวดหมู่รายการ</th>
                   <th className="border p-2 text-right">รายรับ (บาท)</th>
                   <th className="border p-2 text-right">รายจ่าย (บาท)</th>
-                  <th className="border p-2 text-right">คงเหลือ (บาท)</th>
+                  <th className="border p-2 text-right">คงเหลือสุทธิ (บาท)</th>
                 </tr>
               </thead>
               <tbody>
@@ -439,12 +452,12 @@ const App: React.FC = () => {
                   const catIncome = transactions.filter(t => t.category === cat && t.type === TransactionType.INCOME).reduce((sum, t) => sum + t.amount, 0);
                   const catExpense = transactions.filter(t => t.category === cat && t.type === TransactionType.EXPENSE).reduce((sum, t) => sum + t.amount, 0);
                   return (
-                    <tr key={cat}>
+                    <tr key={cat} className="h-10">
                       <td className="border p-2 text-center">{idx + 1}</td>
-                      <td className="border p-2">{cat}</td>
+                      <td className="border p-2 font-bold">{cat}</td>
                       <td className="border p-2 text-right font-mono">{catIncome.toLocaleString()}</td>
                       <td className="border p-2 text-right font-mono">{catExpense.toLocaleString()}</td>
-                      <td className="border p-2 text-right font-mono">{ (catIncome - catExpense).toLocaleString() }</td>
+                      <td className="border p-2 text-right font-mono font-bold">{ (catIncome - catExpense).toLocaleString() }</td>
                     </tr>
                   )
                 })}
@@ -452,60 +465,63 @@ const App: React.FC = () => {
             </table>
           </div>
 
-          <div className="mb-8">
-            <h3 className="text-lg font-bold mb-4 underline">ส่วนที่ 3: รายการบัญชีโดยละเอียด (รายรับ-รายจ่ายทั้งหมด)</h3>
-            <table className="w-full text-xs">
+          {/* Page 3: Detailed Ledger */}
+          <div className="page-break">
+            <h3 className="text-lg font-bold mb-6 border-b-2 border-black inline-block uppercase mt-10">ส่วนที่ 3: รายการบัญชีโดยละเอียด (รายรับ-รายจ่ายทั้งหมด)</h3>
+            <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="border p-1 text-center">ลำดับ</th>
-                  <th className="border p-1 text-center">วันที่</th>
-                  <th className="border p-1">รายการ / ผู้บริจาค</th>
-                  <th className="border p-1 text-center">หมวดหมู่</th>
-                  <th className="border p-1 text-right">จำนวนเงิน (บาท)</th>
+                  <th className="border p-2 text-center">ลำดับ</th>
+                  <th className="border p-2 text-center whitespace-nowrap">วันที่บันทึก</th>
+                  <th className="border p-2">ชื่อรายการ / ผู้บริจาค</th>
+                  <th className="border p-2 text-center">หมวดหมู่</th>
+                  <th className="border p-2 text-right">จำนวนเงิน (บาท)</th>
                 </tr>
               </thead>
               <tbody>
                 {transactions.length === 0 ? (
-                  <tr><td colSpan={5} className="border p-4 text-center italic">ไม่มีรายการที่บันทึก</td></tr>
+                  <tr><td colSpan={5} className="border p-8 text-center italic text-lg">--- ไม่มีรายการที่บันทึก ---</td></tr>
                 ) : (
                   transactions.map((t, idx) => (
-                    <tr key={t.id}>
-                      <td className="border p-1 text-center">{idx + 1}</td>
-                      <td className="border p-1 text-center whitespace-nowrap">{t.date}</td>
-                      <td className="border p-1 font-bold">{t.title}</td>
-                      <td className="border p-1 text-center">{t.category}</td>
-                      <td className={`border p-1 text-right font-mono font-bold ${t.type === TransactionType.INCOME ? 'text-black' : 'text-black italic'}`}>
-                        {t.type === TransactionType.INCOME ? '(+)' : '(-)'} {t.amount.toLocaleString()}
+                    <tr key={t.id} className="h-10">
+                      <td className="border p-2 text-center">{idx + 1}</td>
+                      <td className="border p-2 text-center whitespace-nowrap font-mono">{t.date}</td>
+                      <td className="border p-2 font-bold">{t.title}</td>
+                      <td className="border p-2 text-center text-xs">{t.category}</td>
+                      <td className={`border p-2 text-right font-mono font-bold ${t.type === TransactionType.INCOME ? 'text-black' : 'italic'}`}>
+                        {t.type === TransactionType.INCOME ? '(+) ' : '(-) '} {t.amount.toLocaleString()}
                       </td>
                     </tr>
                   ))
                 )}
               </tbody>
             </table>
-          </div>
 
-          {aiInsight && (
-            <div className="mb-10 p-4 border border-black bg-gray-50 rounded italic text-sm">
-              <span className="font-bold not-italic underline">วิเคราะห์โดยระบบปัญญาประดิษฐ์:</span><br/>
-              "{aiInsight}"
-            </div>
-          )}
+            {aiInsight && (
+              <div className="mt-12 p-6 border-2 border-dashed border-black bg-gray-50 rounded-xl italic">
+                <h4 className="text-sm font-bold uppercase mb-2 not-italic underline">บทวิเคราะห์และข้อเสนอแนะโดยระบบ AI:</h4>
+                <p className="leading-relaxed">"{aiInsight}"</p>
+              </div>
+            )}
 
-          <div className="signature-section">
-            <div className="signature-box">
-              <p className="mb-12">ลงชื่อ............................................................</p>
-              <p>(............................................................)</p>
-              <p className="font-bold mt-2">ผู้สรุปรายงาน / เจ้าหน้าที่บัญชี</p>
+            <div className="signature-section mt-20">
+              <div className="signature-box">
+                <p className="mb-20 italic">ขอรับรองว่าข้อมูลข้างต้นเป็นความจริงทุกประการ</p>
+                <p className="mb-12">ลงชื่อ............................................................</p>
+                <p className="mb-2">(............................................................)</p>
+                <p className="font-bold">เจ้าหน้าที่บัญชี / ผู้สรุปรายงาน</p>
+              </div>
+              <div className="signature-box">
+                <p className="mb-20 italic">ตรวจสอบและพิจารณาอนุมัติ</p>
+                <p className="mb-12">ลงชื่อ............................................................</p>
+                <p className="mb-2">(............................................................)</p>
+                <p className="font-bold">ผู้อำนวยการโรงเรียนประจักษ์ศิลปาคม</p>
+              </div>
             </div>
-            <div className="signature-box">
-              <p className="mb-12">ลงชื่อ............................................................</p>
-              <p>(............................................................)</p>
-              <p className="font-bold mt-2">ผู้อำนวยการโรงเรียนประจักษ์ศิลปาคม</p>
-            </div>
-          </div>
 
-          <div className="mt-20 text-center text-[10px] text-gray-500 border-t border-gray-100 pt-4 italic">
-            เอกสารนี้สร้างขึ้นโดยระบบ Pha Pa Budget Pro v3.0 - โรงเรียนประจักษ์ศิลปาคม
+            <div className="mt-24 text-center text-[10px] text-gray-500 border-t border-gray-100 pt-6 italic">
+              เอกสารฉบับนี้พิมพ์โดยระบบบริหารจัดการงบประมาณ Pha Pa Budget Pro v4.0 - โรงเรียนประจักษ์ศิลปาคม
+            </div>
           </div>
         </div>
       </main>
