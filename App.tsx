@@ -17,7 +17,8 @@ import {
   CakeIcon,
   BeakerIcon,
   Square3Stack3DIcon,
-  HeartIcon
+  HeartIcon,
+  PrinterIcon
 } from '@heroicons/react/24/outline';
 import { 
   BarChart, 
@@ -111,6 +112,10 @@ const App: React.FC = () => {
     setLoadingAi(false);
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   const barData = [
     { name: 'รายรับ', value: summary.totalIncome, color: '#10B981' },
     { name: 'รายจ่าย', value: summary.totalExpense, color: '#F43F5E' },
@@ -141,14 +146,23 @@ const App: React.FC = () => {
               </div>
             </div>
           </div>
-          <button 
-            onClick={handleAiInsight}
-            disabled={loadingAi || transactions.length === 0}
-            className="bg-white/20 hover:bg-white/30 border border-white/40 px-6 py-3 rounded-2xl transition-all flex items-center gap-3 backdrop-blur-lg shadow-xl active:scale-95 disabled:opacity-50"
-          >
-            <SparklesIcon className={`w-6 h-6 text-amber-200 ${loadingAi ? 'animate-spin' : ''}`} />
-            <span className="text-sm font-black uppercase tracking-widest">AI วิเคราะห์งบ</span>
-          </button>
+          <div className="flex gap-2">
+            <button 
+              onClick={handlePrint}
+              className="bg-white/20 hover:bg-white/30 border border-white/40 px-6 py-3 rounded-2xl transition-all flex items-center gap-3 backdrop-blur-lg shadow-xl active:scale-95"
+            >
+              <PrinterIcon className="w-6 h-6 text-white" />
+              <span className="text-sm font-black uppercase tracking-widest">พิมพ์รายงาน</span>
+            </button>
+            <button 
+              onClick={handleAiInsight}
+              disabled={loadingAi || transactions.length === 0}
+              className="bg-white text-orange-600 px-6 py-3 rounded-2xl transition-all flex items-center gap-3 shadow-xl active:scale-95 disabled:opacity-50"
+            >
+              <SparklesIcon className={`w-6 h-6 text-orange-400 ${loadingAi ? 'animate-spin' : ''}`} />
+              <span className="text-sm font-black uppercase tracking-widest">AI วิเคราะห์งบ</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -187,7 +201,7 @@ const App: React.FC = () => {
         )}
 
         {/* Stats Cards - ปรับเป็นแนวตั้งเรียงต่อกัน */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 stats-container">
           <div className="bg-white p-6 rounded-[2rem] shadow-xl border border-emerald-50 flex items-center gap-4">
             <div className="p-4 bg-emerald-100 rounded-2xl"><ArrowDownCircleIcon className="w-8 h-8 text-emerald-600" /></div>
             <div>
@@ -212,7 +226,7 @@ const App: React.FC = () => {
         </div>
 
         {/* Main Content Area - ปรับจาก Grid เป็น Stack แนวตั้ง */}
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-8 no-print">
           {/* Form Section */}
           <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-orange-50">
             <h2 className="text-2xl font-black mb-6 flex items-center gap-3">
@@ -268,7 +282,7 @@ const App: React.FC = () => {
           </div>
 
           {/* Charts Section - ปรับเป็นแนวตั้งเรียงต่อกัน */}
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-8 charts-container">
             {/* Bar Chart */}
             <div className="bg-white p-8 rounded-[3rem] shadow-xl border border-slate-50 flex flex-col">
               <h3 className="font-black text-slate-400 text-xs uppercase tracking-widest mb-6">เปรียบเทียบรับ-จ่าย</h3>
@@ -318,8 +332,8 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Transactions Table */}
-        <div className="bg-white rounded-[3rem] shadow-2xl border border-orange-50 overflow-hidden">
+        {/* Transactions Table Area */}
+        <div className="bg-white rounded-[3rem] shadow-2xl border border-orange-50 overflow-hidden no-print">
           <div className="p-8 border-b border-orange-50 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <h2 className="text-2xl font-black flex items-center gap-4">
               <DocumentTextIcon className="w-7 h-7 text-orange-600" />
@@ -375,6 +389,100 @@ const App: React.FC = () => {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+
+        {/* Printable Report Section (Hidden in UI) */}
+        <div id="printable-report" className="text-slate-900 bg-white">
+          <div className="text-center mb-8 border-b-2 border-slate-900 pb-6">
+            <h1 className="text-3xl font-black mb-2 uppercase">รายงานสรุปงบประมาณงานผ้าป่าเพื่อการศึกษา</h1>
+            <h2 className="text-xl font-bold">โรงเรียนประจักษ์ศิลปาคม</h2>
+            <p className="text-slate-600 mt-2">พิมพ์เมื่อวันที่: {new Date().toLocaleDateString('th-TH')}</p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4 mb-8">
+            <div className="border p-4 text-center rounded">
+              <p className="text-xs font-bold text-slate-500 uppercase">รายรับรวม</p>
+              <p className="text-xl font-black">{summary.totalIncome.toLocaleString()} บาท</p>
+            </div>
+            <div className="border p-4 text-center rounded">
+              <p className="text-xs font-bold text-slate-500 uppercase">รายจ่ายรวม</p>
+              <p className="text-xl font-black">{summary.totalExpense.toLocaleString()} บาท</p>
+            </div>
+            <div className="border p-4 text-center rounded bg-slate-50">
+              <p className="text-xs font-bold text-slate-500 uppercase">ยอดคงเหลือสุทธิ</p>
+              <p className="text-xl font-black">{summary.balance.toLocaleString()} บาท</p>
+            </div>
+          </div>
+
+          <div className="mb-8">
+            <h3 className="text-lg font-black mb-4 border-l-4 border-orange-500 pl-3">สรุปตามหมวดหมู่</h3>
+            <table className="w-full">
+              <thead>
+                <tr className="bg-slate-100">
+                  <th className="px-4 py-2 text-left">หมวดหมู่</th>
+                  <th className="px-4 py-2 text-right">ยอดเงิน (บาท)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.values(TransactionCategory).map(cat => {
+                  const val = transactions.filter(t => t.category === cat).reduce((sum, t) => sum + t.amount, 0);
+                  return (
+                    <tr key={cat}>
+                      <td className="px-4 py-2 border">{cat}</td>
+                      <td className="px-4 py-2 border text-right font-mono">{val.toLocaleString()}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mb-12">
+            <h3 className="text-lg font-black mb-4 border-l-4 border-orange-500 pl-3">รายการบัญชีทั้งหมด</h3>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-slate-100">
+                  <th className="px-4 py-2 border">วันที่</th>
+                  <th className="px-4 py-2 border">รายการ</th>
+                  <th className="px-4 py-2 border">หมวดหมู่</th>
+                  <th className="px-4 py-2 border text-right">จำนวนเงิน</th>
+                </tr>
+              </thead>
+              <tbody>
+                {transactions.map((t) => (
+                  <tr key={t.id}>
+                    <td className="px-4 py-2 border">{t.date}</td>
+                    <td className="px-4 py-2 border">{t.title}</td>
+                    <td className="px-4 py-2 border">{t.category}</td>
+                    <td className={`px-4 py-2 border text-right font-mono font-bold ${t.type === TransactionType.INCOME ? 'text-emerald-700' : 'text-rose-700'}`}>
+                      {t.type === TransactionType.INCOME ? '+' : '-'}{t.amount.toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {aiInsight && (
+            <div className="mb-12 p-6 border-2 border-dashed border-slate-300 rounded-xl bg-slate-50">
+              <h3 className="text-sm font-black text-slate-500 uppercase mb-2">บทวิเคราะห์โดย AI</h3>
+              <p className="italic text-slate-700">"{aiInsight}"</p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-12 mt-16 pb-12">
+            <div className="text-center">
+              <p className="mb-16">(ลงชื่อ)............................................................</p>
+              <p className="(............................................................)">(............................................................)</p>
+              <p className="font-bold mt-2">ผู้รับรอง</p>
+              <p className="text-xs text-slate-500">ตำแหน่ง................................................</p>
+            </div>
+            <div className="text-center">
+              <p className="mb-16">(ลงชื่อ)............................................................</p>
+              <p className="(............................................................)">(............................................................)</p>
+              <p className="font-bold mt-2">ผู้อำนวยการโรงเรียนประจักษ์ศิลปาคม</p>
+            </div>
           </div>
         </div>
       </main>
