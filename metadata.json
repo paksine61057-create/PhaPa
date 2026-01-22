@@ -1,0 +1,7 @@
+{
+  "name": "Pha Pa Budget Pro",
+  "description": "A modern budget management system for traditional Thai Pha Pa merit-making ceremonies, featuring real-time tracking, data visualization, and AI-powered financial summaries.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
