@@ -20,7 +20,10 @@ import {
   HeartIcon,
   PrinterIcon,
   PhotoIcon,
-  XMarkIcon
+  XMarkIcon,
+  LockClosedIcon,
+  UserIcon,
+  ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
 import { 
   BarChart, 
@@ -47,6 +50,14 @@ const categoryConfig = {
 };
 
 const App: React.FC = () => {
+  // Authentication State
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
+    return sessionStorage.getItem('isStaffLoggedIn') === 'true';
+  });
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginForm, setLoginForm] = useState({ username: '', password: '' });
+  const [loginError, setLoginError] = useState('');
+
   const [transactions, setTransactions] = useState<Transaction[]>(() => {
     const saved = localStorage.getItem('phapa_transactions');
     return saved ? JSON.parse(saved) : [];
@@ -86,6 +97,24 @@ const App: React.FC = () => {
     );
   }, [transactions, activeTab]);
 
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (loginForm.username === 'PJ00' && loginForm.password === 'PJ123') {
+      setIsLoggedIn(true);
+      sessionStorage.setItem('isStaffLoggedIn', 'true');
+      setShowLoginModal(false);
+      setLoginError('');
+      setLoginForm({ username: '', password: '' });
+    } else {
+      setLoginError('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+    }
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    sessionStorage.removeItem('isStaffLoggedIn');
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -99,7 +128,7 @@ const App: React.FC = () => {
 
   const addTransaction = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !amount) return;
+    if (!isLoggedIn || !title || !amount) return;
     const newTransaction: Transaction = {
       id: crypto.randomUUID(),
       title,
@@ -117,6 +146,7 @@ const App: React.FC = () => {
   };
 
   const deleteTransaction = (id: string) => {
+    if (!isLoggedIn) return;
     setTransactions(transactions.filter(t => t.id !== id));
   };
 
@@ -162,7 +192,7 @@ const App: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button 
               onClick={handlePrint}
               className="bg-white/20 hover:bg-white/30 border border-white/40 px-6 py-3 rounded-2xl transition-all flex items-center gap-3 backdrop-blur-lg shadow-xl active:scale-95"
@@ -178,9 +208,82 @@ const App: React.FC = () => {
               <SparklesIcon className={`w-6 h-6 text-orange-400 ${loadingAi ? 'animate-spin' : ''}`} />
               <span className="text-sm font-black uppercase tracking-widest">AI วิเคราะห์งบ</span>
             </button>
+            {!isLoggedIn ? (
+              <button 
+                onClick={() => setShowLoginModal(true)}
+                className="bg-amber-100/20 hover:bg-amber-100/30 border border-amber-100/40 px-6 py-3 rounded-2xl transition-all flex items-center gap-3 backdrop-blur-lg shadow-xl active:scale-95 text-amber-50"
+              >
+                <LockClosedIcon className="w-6 h-6" />
+                <span className="text-sm font-black uppercase tracking-widest">สำหรับเจ้าหน้าที่</span>
+              </button>
+            ) : (
+              <button 
+                onClick={handleLogout}
+                className="bg-rose-500 hover:bg-rose-600 border border-rose-400 px-6 py-3 rounded-2xl transition-all flex items-center gap-3 shadow-xl active:scale-95 text-white"
+              >
+                <ArrowRightOnRectangleIcon className="w-6 h-6" />
+                <span className="text-sm font-black uppercase tracking-widest">ออกจากระบบ (PJ00)</span>
+              </button>
+            )}
           </div>
         </div>
       </header>
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="bg-gradient-to-br from-orange-500 to-amber-500 p-8 text-white relative">
+              <button 
+                onClick={() => setShowLoginModal(false)}
+                className="absolute top-6 right-6 text-white/70 hover:text-white transition-colors"
+              >
+                <XMarkIcon className="w-8 h-8" />
+              </button>
+              <LockClosedIcon className="w-12 h-12 mb-4 text-amber-200" />
+              <h2 className="text-2xl font-black">เข้าสู่ระบบเจ้าหน้าที่</h2>
+              <p className="text-orange-50 font-bold opacity-80">กรุณาระบุรหัสผ่านเพื่อเข้าถึงการแก้ไขข้อมูล</p>
+            </div>
+            <form onSubmit={handleLogin} className="p-8 space-y-5">
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">ชื่อผู้ใช้ (Username)</label>
+                <div className="relative">
+                  <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <input
+                    type="text"
+                    required
+                    value={loginForm.username}
+                    onChange={(e) => setLoginForm({...loginForm, username: e.target.value})}
+                    placeholder="PJ00"
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-12 py-4 focus:bg-white focus:border-orange-200 outline-none transition-all font-bold"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">รหัสผ่าน (Password)</label>
+                <div className="relative">
+                  <LockClosedIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <input
+                    type="password"
+                    required
+                    value={loginForm.password}
+                    onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
+                    placeholder="••••••••"
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-12 py-4 focus:bg-white focus:border-orange-200 outline-none transition-all font-bold"
+                  />
+                </div>
+              </div>
+              {loginError && <p className="text-rose-500 text-sm font-bold text-center animate-pulse">{loginError}</p>}
+              <button 
+                type="submit" 
+                className="w-full bg-orange-600 hover:bg-orange-700 text-white font-black py-4 rounded-2xl shadow-lg shadow-orange-100 transition-all active:scale-95"
+              >
+                เข้าสู่ระบบ
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       <main className="max-w-5xl mx-auto p-4 space-y-8 -mt-8 relative z-10">
         
@@ -243,93 +346,111 @@ const App: React.FC = () => {
 
         {/* Form and Charts */}
         <div className="flex flex-col gap-8 no-print">
-          <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-orange-50">
-            <h2 className="text-2xl font-black mb-6 flex items-center gap-3">
-              <PlusIcon className="w-6 h-6 text-orange-600" />
-              บันทึกรายการ
-            </h2>
-            <form onSubmit={addTransaction} className="space-y-5">
-              <div className="flex bg-slate-100 p-1.5 rounded-2xl">
-                <button type="button" onClick={() => { setType(TransactionType.INCOME); setCategory(TransactionCategory.DONATION); }} className={`flex-1 py-3 rounded-xl text-sm font-black transition-all ${type === TransactionType.INCOME ? 'bg-white shadow text-emerald-600' : 'text-slate-400'}`}>รายรับ</button>
-                <button type="button" onClick={() => { setType(TransactionType.EXPENSE); setCategory(TransactionCategory.CATERING); }} className={`flex-1 py-3 rounded-xl text-sm font-black transition-all ${type === TransactionType.EXPENSE ? 'bg-white shadow text-rose-600' : 'text-slate-400'}`}>รายจ่าย</button>
-              </div>
-
-              <div className="space-y-3">
-                <p className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">เลือกหมวดหมู่</p>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                  {Object.values(TransactionCategory).map((cat) => {
-                    const Config = categoryConfig[cat];
-                    const Icon = Config.icon;
-                    const isActive = category === cat;
-                    return (
-                      <button
-                        key={cat}
-                        type="button"
-                        onClick={() => setCategory(cat)}
-                        className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all ${isActive ? `border-orange-500 ${Config.bg}` : 'border-slate-50 bg-slate-50 hover:bg-white'}`}
-                      >
-                        <Icon className={`w-6 h-6 mb-1 ${isActive ? Config.color : 'text-slate-400'}`} />
-                        <span className={`text-[10px] font-black ${isActive ? 'text-slate-800' : 'text-slate-400'}`}>{cat}</span>
-                      </button>
-                    );
-                  })}
+          {/* Conditional Rendering for Record Form: ONLY for Staff */}
+          {isLoggedIn ? (
+            <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-orange-50 animate-in slide-in-from-left duration-500">
+              <h2 className="text-2xl font-black mb-6 flex items-center gap-3">
+                <PlusIcon className="w-6 h-6 text-orange-600" />
+                บันทึกรายการโดยเจ้าหน้าที่ (PJ00)
+              </h2>
+              <form onSubmit={addTransaction} className="space-y-5">
+                <div className="flex bg-slate-100 p-1.5 rounded-2xl">
+                  <button type="button" onClick={() => { setType(TransactionType.INCOME); setCategory(TransactionCategory.DONATION); }} className={`flex-1 py-3 rounded-xl text-sm font-black transition-all ${type === TransactionType.INCOME ? 'bg-white shadow text-emerald-600' : 'text-slate-400'}`}>รายรับ</button>
+                  <button type="button" onClick={() => { setType(TransactionType.EXPENSE); setCategory(TransactionCategory.CATERING); }} className={`flex-1 py-3 rounded-xl text-sm font-black transition-all ${type === TransactionType.EXPENSE ? 'bg-white shadow text-rose-600' : 'text-slate-400'}`}>รายจ่าย</button>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="ชื่อรายการ / ผู้บริจาค"
-                  className="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl px-5 py-4 focus:bg-white focus:border-orange-200 outline-none transition-all font-bold"
-                />
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="จำนวนเงิน"
-                  className="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl px-5 py-4 focus:bg-white focus:border-orange-200 outline-none transition-all font-mono text-xl font-black text-orange-600"
-                />
-              </div>
+                <div className="space-y-3">
+                  <p className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">เลือกหมวดหมู่</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {Object.values(TransactionCategory).map((cat) => {
+                      const Config = categoryConfig[cat];
+                      const Icon = Config.icon;
+                      const isActive = category === cat;
+                      return (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => setCategory(cat)}
+                          className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all ${isActive ? `border-orange-500 ${Config.bg}` : 'border-slate-50 bg-slate-50 hover:bg-white'}`}
+                        >
+                          <Icon className={`w-6 h-6 mb-1 ${isActive ? Config.color : 'text-slate-400'}`} />
+                          <span className={`text-[10px] font-black ${isActive ? 'text-slate-800' : 'text-slate-400'}`}>{cat}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
 
-              {/* Image Upload Input */}
-              <div className="space-y-3">
-                <p className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">แนบรูปภาพหลักฐาน</p>
-                <div className="flex items-center gap-4">
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2 bg-slate-50 border-2 border-dashed border-slate-200 px-6 py-4 rounded-2xl hover:bg-slate-100 transition-all text-slate-500 font-bold"
-                  >
-                    <PhotoIcon className="w-6 h-6" />
-                    <span>เลือกรูปภาพหลักฐาน</span>
-                  </button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleImageChange}
-                    accept="image/*"
-                    className="hidden"
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="ชื่อรายการ / ผู้บริจาค"
+                    className="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl px-5 py-4 focus:bg-white focus:border-orange-200 outline-none transition-all font-bold"
                   />
-                  {receiptImage && (
-                    <div className="relative group">
-                      <img src={receiptImage} alt="Receipt Preview" className="w-16 h-16 object-cover rounded-xl shadow-md border-2 border-orange-200" />
-                      <button
-                        type="button"
-                        onClick={() => setReceiptImage(undefined)}
-                        className="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <XMarkIcon className="w-3 h-3" />
-                      </button>
-                    </div>
-                  )}
+                  <input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="จำนวนเงิน"
+                    className="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl px-5 py-4 focus:bg-white focus:border-orange-200 outline-none transition-all font-mono text-xl font-black text-orange-600"
+                  />
                 </div>
-              </div>
 
-              <button type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white font-black py-4 rounded-2xl shadow-lg shadow-orange-100 transition-all active:scale-95">บันทึกข้อมูล</button>
-            </form>
-          </div>
+                <div className="space-y-3">
+                  <p className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">แนบรูปภาพหลักฐาน</p>
+                  <div className="flex items-center gap-4">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex items-center gap-2 bg-slate-50 border-2 border-dashed border-slate-200 px-6 py-4 rounded-2xl hover:bg-slate-100 transition-all text-slate-500 font-bold"
+                    >
+                      <PhotoIcon className="w-6 h-6" />
+                      <span>เลือกรูปภาพหลักฐาน</span>
+                    </button>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleImageChange}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    {receiptImage && (
+                      <div className="relative group">
+                        <img src={receiptImage} alt="Receipt Preview" className="w-16 h-16 object-cover rounded-xl shadow-md border-2 border-orange-200" />
+                        <button
+                          type="button"
+                          onClick={() => setReceiptImage(undefined)}
+                          className="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <XMarkIcon className="w-3 h-3" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <button type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white font-black py-4 rounded-2xl shadow-lg shadow-orange-100 transition-all active:scale-95">บันทึกข้อมูล</button>
+              </form>
+            </div>
+          ) : (
+            <div className="bg-amber-50 p-8 rounded-[3rem] shadow-xl border border-amber-200 flex flex-col items-center text-center space-y-4 animate-in slide-in-from-right duration-500">
+               <div className="bg-white p-4 rounded-full shadow-inner border border-amber-100">
+                  <LockClosedIcon className="w-10 h-10 text-amber-500" />
+               </div>
+               <div>
+                  <h2 className="text-xl font-black text-amber-800">โหมดมุมมองข้อมูลสำหรับผู้ทั่วไป</h2>
+                  <p className="text-amber-600 font-medium">เฉพาะเจ้าหน้าที่ PJ00 เท่านั้นที่สามารถบันทึกหรือลบข้อมูลได้</p>
+               </div>
+               <button 
+                  onClick={() => setShowLoginModal(true)}
+                  className="px-8 py-3 bg-amber-500 hover:bg-amber-600 text-white font-black rounded-2xl transition-all active:scale-95 shadow-lg shadow-amber-200"
+               >
+                  เข้าสู่ระบบเจ้าหน้าที่
+               </button>
+            </div>
+          )}
 
           <div className="flex flex-col gap-8 charts-container no-print">
             <div className="bg-white p-8 rounded-[3rem] shadow-xl border border-slate-50">
@@ -443,7 +564,12 @@ const App: React.FC = () => {
                           {t.type === TransactionType.INCOME ? '+' : '-'}{t.amount.toLocaleString()}
                         </td>
                         <td className="px-10 py-6 text-right">
-                          <button onClick={() => deleteTransaction(t.id)} className="p-2 text-slate-200 hover:text-rose-600 transition-all opacity-0 group-hover:opacity-100"><TrashIcon className="w-5 h-5" /></button>
+                          {/* DELETE button: ONLY for Staff */}
+                          {isLoggedIn ? (
+                            <button onClick={() => deleteTransaction(t.id)} className="p-2 text-slate-200 hover:text-rose-600 transition-all opacity-0 group-hover:opacity-100"><TrashIcon className="w-5 h-5" /></button>
+                          ) : (
+                            <div className="w-9 h-9"></div>
+                          )}
                         </td>
                       </tr>
                     );
@@ -594,7 +720,7 @@ const App: React.FC = () => {
             </div>
 
             <div className="mt-24 text-center text-[10px] text-gray-500 border-t border-gray-100 pt-6 italic">
-              เอกสารฉบับนี้พิมพ์โดยระบบบริหารจัดการงบประมาณ Pha Pa Budget Pro v4.1 - โรงเรียนประจักษ์ศิลปาคม
+              เอกสารฉบับนี้พิมพ์โดยระบบบริหารจัดการงบประมาณ Pha Pa Budget Pro v4.2 - โรงเรียนประจักษ์ศิลปาคม
             </div>
           </div>
         </div>
