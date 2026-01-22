@@ -8,25 +8,27 @@ export const getBudgetInsights = async (
 ): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
   
+  const categorySummary = transactions.reduce((acc: any, t) => {
+    acc[t.category] = (acc[t.category] || 0) + t.amount;
+    return acc;
+  }, {});
+
   const context = `
-    This is a budget for a Thai "Pha Pa" (ผ้าป่า) merit ceremony.
-    Organization: โรงเรียนประจักษ์ศิลปาคม (Prachak Silapakom School)
-    Event Date: 12 เมษายน 2569 (April 12, 2026)
-    Specific Goal: จัดหาคอมพิวเตอร์เพื่อการศึกษา (To provide computers for education)
+    นี่คือข้อมูลสรุปงบประมาณงานผ้าป่า "จัดหาคอมพิวเตอร์เพื่อการศึกษา" โรงเรียนประจักษ์ศิลปาคม
     
-    Current Stats:
-    - Total Income: ${summary.totalIncome.toLocaleString()} THB
-    - Total Expense: ${summary.totalExpense.toLocaleString()} THB
-    - Net Balance: ${summary.balance.toLocaleString()} THB
+    สรุปยอดรวม:
+    - รายรับทั้งหมด: ${summary.totalIncome.toLocaleString()} บาท
+    - รายจ่ายทั้งหมด: ${summary.totalExpense.toLocaleString()} บาท
+    - คงเหลือสุทธิ: ${summary.balance.toLocaleString()} บาท
     
-    Recent Transactions:
-    ${transactions.slice(-10).map(t => `- [${t.type}] ${t.title}: ${t.amount.toLocaleString()} THB (${t.date})`).join('\n')}
+    แยกตามหมวดหมู่:
+    ${Object.entries(categorySummary).map(([cat, amt]) => `- ${cat}: ${Number(amt).toLocaleString()} บาท`).join('\n')}
     
-    Task: Provide a short, encouraging summary in Thai.
-    - Mention that the funds are for "จัดหาคอมพิวเตอร์เพื่อการศึกษา" at "โรงเรียนประจักษ์ศิลปาคม".
-    - Based on the current balance, comment on how many computers they might be able to afford (estimate 15,000 - 20,000 THB per computer) if applicable.
-    - Encourage donors to reach the goal.
-    - Use a polite, formal, and warm tone ("Krap/Ka"). Keep it under 150 words.
+    ภารกิจ:
+    1. ให้คำแนะนำสั้นๆ เกี่ยวกับการบริหารงบประมาณใน 4 หมวด (โต๊ะจีน, เครื่องดื่ม, แก้ว, รับบริจาค)
+    2. วิเคราะห์ว่าเงินคงเหลือเพียงพอสำหรับคอมพิวเตอร์กี่เครื่อง (ราคาประมาณ 20,000 บาท/เครื่อง)
+    3. ให้กำลังใจคณะทำงานและผู้บริจาค
+    4. ใช้ภาษาไทยที่เป็นทางการแต่สุภาพ (มีครับ/ค่ะ) ไม่เกิน 150 คำ
   `;
 
   try {
