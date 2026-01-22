@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Transaction, TransactionType, BudgetSummary, TransactionCategory } from './types';
 import { 
   PlusIcon, 
@@ -18,7 +18,9 @@ import {
   BeakerIcon,
   Square3Stack3DIcon,
   HeartIcon,
-  PrinterIcon
+  PrinterIcon,
+  PhotoIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import { 
   BarChart, 
@@ -57,6 +59,8 @@ const App: React.FC = () => {
   const [amount, setAmount] = useState('');
   const [type, setType] = useState<TransactionType>(TransactionType.INCOME);
   const [category, setCategory] = useState<TransactionCategory>(TransactionCategory.DONATION);
+  const [receiptImage, setReceiptImage] = useState<string | undefined>(undefined);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     localStorage.setItem('phapa_transactions', JSON.stringify(transactions));
@@ -82,6 +86,17 @@ const App: React.FC = () => {
     );
   }, [transactions, activeTab]);
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setReceiptImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const addTransaction = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !amount) return;
@@ -92,10 +107,13 @@ const App: React.FC = () => {
       type,
       category,
       date: new Date().toLocaleDateString('th-TH'),
+      receiptImage,
     };
     setTransactions([newTransaction, ...transactions]);
     setTitle('');
     setAmount('');
+    setReceiptImage(undefined);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const deleteTransaction = (id: string) => {
@@ -274,6 +292,41 @@ const App: React.FC = () => {
                   className="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl px-5 py-4 focus:bg-white focus:border-orange-200 outline-none transition-all font-mono text-xl font-black text-orange-600"
                 />
               </div>
+
+              {/* Image Upload Input */}
+              <div className="space-y-3">
+                <p className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">แนบรูปภาพหลักฐาน</p>
+                <div className="flex items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-2 bg-slate-50 border-2 border-dashed border-slate-200 px-6 py-4 rounded-2xl hover:bg-slate-100 transition-all text-slate-500 font-bold"
+                  >
+                    <PhotoIcon className="w-6 h-6" />
+                    <span>เลือกรูปภาพหลักฐาน</span>
+                  </button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  {receiptImage && (
+                    <div className="relative group">
+                      <img src={receiptImage} alt="Receipt Preview" className="w-16 h-16 object-cover rounded-xl shadow-md border-2 border-orange-200" />
+                      <button
+                        type="button"
+                        onClick={() => setReceiptImage(undefined)}
+                        className="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <XMarkIcon className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <button type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white font-black py-4 rounded-2xl shadow-lg shadow-orange-100 transition-all active:scale-95">บันทึกข้อมูล</button>
             </form>
           </div>
@@ -346,6 +399,7 @@ const App: React.FC = () => {
               <thead>
                 <tr className="bg-slate-50/50 text-slate-400 text-[10px] uppercase font-black tracking-widest">
                   <th className="px-10 py-6">วันที่</th>
+                  <th className="px-10 py-6">หลักฐาน</th>
                   <th className="px-10 py-6">หมวดหมู่</th>
                   <th className="px-10 py-6">รายการ</th>
                   <th className="px-10 py-6 text-right">จำนวน (บาท)</th>
@@ -355,7 +409,7 @@ const App: React.FC = () => {
               <tbody className="divide-y divide-orange-50">
                 {filteredTransactions.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-10 py-24 text-center text-slate-400 italic font-bold">ยังไม่มีข้อมูลบันทึกในหมวดนี้</td>
+                    <td colSpan={6} className="px-10 py-24 text-center text-slate-400 italic font-bold">ยังไม่มีข้อมูลบันทึกในหมวดนี้</td>
                   </tr>
                 ) : (
                   filteredTransactions.map((t) => {
@@ -364,6 +418,20 @@ const App: React.FC = () => {
                     return (
                       <tr key={t.id} className="hover:bg-orange-50/30 transition-all group">
                         <td className="px-10 py-6 text-sm text-slate-400 font-bold">{t.date}</td>
+                        <td className="px-10 py-6">
+                          {t.receiptImage ? (
+                            <img 
+                              src={t.receiptImage} 
+                              alt="Receipt" 
+                              className="w-10 h-10 object-cover rounded-lg shadow-sm cursor-pointer hover:scale-110 transition-transform"
+                              onClick={() => window.open(t.receiptImage, '_blank')}
+                            />
+                          ) : (
+                            <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-300">
+                              <PhotoIcon className="w-5 h-5" />
+                            </div>
+                          )}
+                        </td>
                         <td className="px-10 py-6">
                           <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border ${Config.bg} ${Config.color} border-current opacity-80`}>
                             <Icon className="w-4 h-4" />
@@ -467,14 +535,14 @@ const App: React.FC = () => {
 
           {/* Page 3: Detailed Ledger */}
           <div className="page-break">
-            <h3 className="text-lg font-bold mb-6 border-b-2 border-black inline-block uppercase mt-10">ส่วนที่ 3: รายการบัญชีโดยละเอียด (รายรับ-รายจ่ายทั้งหมด)</h3>
+            <h3 className="text-lg font-bold mb-6 border-b-2 border-black inline-block uppercase mt-10">ส่วนที่ 3: รายการบัญชีโดยละเอียดและหลักฐาน</h3>
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-100">
                   <th className="border p-2 text-center">ลำดับ</th>
-                  <th className="border p-2 text-center whitespace-nowrap">วันที่บันทึก</th>
+                  <th className="border p-2 text-center whitespace-nowrap">วันที่</th>
                   <th className="border p-2">ชื่อรายการ / ผู้บริจาค</th>
-                  <th className="border p-2 text-center">หมวดหมู่</th>
+                  <th className="border p-2 text-center">หลักฐาน</th>
                   <th className="border p-2 text-right">จำนวนเงิน (บาท)</th>
                 </tr>
               </thead>
@@ -483,11 +551,17 @@ const App: React.FC = () => {
                   <tr><td colSpan={5} className="border p-8 text-center italic text-lg">--- ไม่มีรายการที่บันทึก ---</td></tr>
                 ) : (
                   transactions.map((t, idx) => (
-                    <tr key={t.id} className="h-10">
+                    <tr key={t.id} className="h-16">
                       <td className="border p-2 text-center">{idx + 1}</td>
                       <td className="border p-2 text-center whitespace-nowrap font-mono">{t.date}</td>
                       <td className="border p-2 font-bold">{t.title}</td>
-                      <td className="border p-2 text-center text-xs">{t.category}</td>
+                      <td className="border p-2 text-center">
+                        {t.receiptImage ? (
+                          <img src={t.receiptImage} alt="Receipt Thumb" className="w-12 h-12 object-cover mx-auto rounded border border-gray-300" />
+                        ) : (
+                          <span className="text-gray-300 italic text-[10px]">ไม่มีหลักฐาน</span>
+                        )}
+                      </td>
                       <td className={`border p-2 text-right font-mono font-bold ${t.type === TransactionType.INCOME ? 'text-black' : 'italic'}`}>
                         {t.type === TransactionType.INCOME ? '(+) ' : '(-) '} {t.amount.toLocaleString()}
                       </td>
@@ -520,7 +594,7 @@ const App: React.FC = () => {
             </div>
 
             <div className="mt-24 text-center text-[10px] text-gray-500 border-t border-gray-100 pt-6 italic">
-              เอกสารฉบับนี้พิมพ์โดยระบบบริหารจัดการงบประมาณ Pha Pa Budget Pro v4.0 - โรงเรียนประจักษ์ศิลปาคม
+              เอกสารฉบับนี้พิมพ์โดยระบบบริหารจัดการงบประมาณ Pha Pa Budget Pro v4.1 - โรงเรียนประจักษ์ศิลปาคม
             </div>
           </div>
         </div>

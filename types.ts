@@ -19,6 +19,7 @@ export interface Transaction {
   amount: number;
   date: string;
   note?: string;
+  receiptImage?: string; // เก็บภาพหลักฐาน (base64)
 }
 
 export interface BudgetSummary {
